@@ -1,0 +1,4 @@
+#Thu Nov 04 00:35:41 CET 2010
+eclipse.preferences.version=1
+gmf_dashboard/domainGenerationModel=platform\:/resource/StateMachine/metaModels/StateMachine.genmodel
+gmf_dashboard/domainModel=platform\:/resource/StateMachine/metaModels/StateMachine.ecore
