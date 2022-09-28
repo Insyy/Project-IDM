@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>Projet_IDM</name>
+	<name>StateMachine</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -32,7 +32,6 @@
 		</buildCommand>
 	</buildSpec>
 	<natures>
-		<nature>org.eclipse.sirius.nature.modelingproject</nature>
 		<nature>org.eclipse.m2m.atl.adt.builder.atlNature</nature>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 		<nature>org.eclipse.pde.PluginNature</nature>

@@ -129,7 +129,7 @@ public class StateMachineManipulation {
 		Transition trans = null;
 		while (!fini) {
 			for (Transition t : sm.getTransitions())
-				if (t.getEvent().getName().equals(evt) && (activeState == t.getSource())) {
+				if (t.getEvent().getName().equals(evt) && (activeState == t.getSource()) && guardIsTrue(t)) {
 					trans = t;
 					fini = true;
 				}
@@ -153,20 +153,22 @@ public class StateMachineManipulation {
 		return null;
 	}
 
+	// Initialise la machine à états en activant tous les états initiaux
 	public void initStateMachine(StateMachine sm) {
 		sm.setIsActive(true);
 		State s = sm.getInitialState().getReferencedState();
-		System.out.println("Initial state is " + s.getName());
 		while (s != null) {
 			s.setIsActive(true);
-			Operation o = s.getOperation();
-			processOperation(o);
 			if (s instanceof CompositeState) {
 				s = ((CompositeState) s).getInitialState().getReferencedState();
+				processOperation(s.getOperation());
 			}
-
-			else
+				
+			else {
+				processOperation(s.getOperation());
 				s = null;
+			}
+				
 		}
 	}
 
@@ -175,42 +177,37 @@ public class StateMachineManipulation {
 		for (Assignment a : o.getContents()) {
 			System.out.println("Name of assignment " + a.get_name());
 			System.out.println(a.getVariable().getName() + " Value: " + a.getVariable().getValue());
+			System.out.println("Expression : " + a.getExpression());
 			a.getVariable().setValue(this.evaluate(a.getExpression()));
 			System.out.println("After: " + a.getVariable().getName() + " Value: " + a.getVariable().getValue());
 		}
 	}
 
-	public void processEvent(StateMachine sm, String event) {
+	public void processEvent(String event, StateMachine sm) {
 		Transition trans = this.getTriggerableTransition(event, sm);
-
+		System.out.println("Transition " + trans.getEvent() + " " + trans.getGuard());
 		if (trans != null) {
-
-			for (Variable v : sm.getVariables()) {
-				System.out.println("Variable " + v.getName() + " : " + v.getValue());
-			}
-			if (trans.getGuard() != null) {
-				processTransition(trans);
-			}
-
 			this.unactivateStateHierarchy(trans.getSource());
 			State target = trans.getTarget();
 			this.activateStateHierarchy(target);
-
+			
+			System.out.println("Nouvel etat " + target.getName());
+			
 			if (target instanceof CompositeState) {
-				State activeState = getLeafActiveState((CompositeState) target);
-				processOperation(activeState.getOperation());
-			} else if (target.getOperation() != null)
+				target = getLeafActiveState((CompositeState) target);
+				System.out.println("Nouvel etat " + target.getName());
+			}
+			
+			if (target.getOperation() != null) {
+				System.out.println(target.getOperation());
 				processOperation(target.getOperation());
+			}
 		}
 	}
 
-	public void processTransition(Transition trans) {
-		Expression exp = trans.getGuard();
-
-		Data result = evaluate(exp);
-
-		System.out.println("Result: " + ((BooleanData) result).isValue());
-
+	private boolean guardIsTrue(Transition trans) {
+		if (trans.getGuard() == null) return true;
+		return ((BooleanData) evaluate(trans.getGuard())).isValue();
 	}
 
 	private IntegerData evaluateIntegerOperation(Operator op, IntegerData leftData, IntegerData rightData) {
@@ -256,7 +253,6 @@ public class StateMachineManipulation {
 			System.out.println("! " + result.isValue());
 			return result;
 		}
-
 
 		// TRAITEMENT DES OPERATIONS EQ ET NEQ EN FONCTION DU TYPE DES ELEMENTS
 		if (leftData instanceof BooleanData && rightData instanceof BooleanData) {
@@ -321,8 +317,13 @@ public class StateMachineManipulation {
 	}
 
 	private Data evaluate(ExpressionElement ex) {
+		
 
 		System.out.println("evaluate");
+		
+		if (ex == null) {
+			System.out.println("EXPRESSION IS NULL!");
+		}
 
 		if (ex instanceof VariableReference) {
 			return ((VariableReference) ex).getVariable().getValue();
@@ -405,7 +406,7 @@ public class StateMachineManipulation {
 			System.out.print("Entrez le nom d'un �v�nement (\"end\" pour terminer) : ");
 			event = scan.nextLine();
 			if (!event.equals("end"))
-				processEvent(sm, event);
+				processEvent(event, sm);
 		}
 
 	}
