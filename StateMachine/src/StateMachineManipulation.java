@@ -173,33 +173,44 @@ public class StateMachineManipulation {
 	}
 
 	public void processOperation(Operation o) {
-		System.out.println("Process operation " + o.getName());
 		for (Assignment a : o.getContents()) {
-			System.out.println("Name of assignment " + a.get_name());
-			System.out.println(a.getVariable().getName() + " Value: " + a.getVariable().getValue());
-			System.out.println("Expression : " + a.getExpression());
-			a.getVariable().setValue(this.evaluate(a.getExpression()));
-			System.out.println("After: " + a.getVariable().getName() + " Value: " + a.getVariable().getValue());
+			//System.out.println("Name of assignment " + a.get_name());
+			//System.out.println(a.getVariable().getName() + " Value: " + a.getVariable().getValue());
+			//System.out.println("Expression : " + a.getExpression());
+			SimplStateMachineFactory factory = new SimplStateMachineFactoryImpl();
+			Data data = null;
+			if (evaluate(a.getExpression()) instanceof IntegerData) {
+				data = factory.createIntegerData();
+				((IntegerData) data).setValue(((IntegerData) evaluate(a.getExpression())).getValue());
+			} else if (evaluate(a.getExpression()) instanceof BooleanData) {
+				data = factory.createBooleanData();
+				((BooleanData) data).setValue(((BooleanData) evaluate(a.getExpression())).isValue());
+			}
+			
+			a.getVariable().setValue(data);
+			
+			System.out.println(a.getVariable().getName() + " new value is: " + a.getVariable().getValue());
 		}
 	}
 
 	public void processEvent(String event, StateMachine sm) {
 		Transition trans = this.getTriggerableTransition(event, sm);
-		System.out.println("Transition " + trans.getEvent() + " " + trans.getGuard());
-		if (trans != null) {
+		if (trans != null) {	
+			
+			System.out.println("New transition is: " + trans.getEvent() + " " + trans.getGuard());
+
 			this.unactivateStateHierarchy(trans.getSource());
 			State target = trans.getTarget();
 			this.activateStateHierarchy(target);
 			
-			System.out.println("Nouvel etat " + target.getName());
+			System.out.println("New state is: " + target.getName());
 			
 			if (target instanceof CompositeState) {
 				target = getLeafActiveState((CompositeState) target);
-				System.out.println("Nouvel etat " + target.getName());
+				System.out.println("New state is: " + target.getName());
 			}
 			
 			if (target.getOperation() != null) {
-				System.out.println(target.getOperation());
 				processOperation(target.getOperation());
 			}
 		}
@@ -219,19 +230,19 @@ public class StateMachineManipulation {
 
 		switch (op) {
 		case ADD:
-			System.out.println(leftValue + " + " + rightValue + " == " + (leftValue + rightValue));
+			//System.out.println(leftValue + " + " + rightValue + " == " + (leftValue + rightValue));
 			result.setValue(leftValue + rightValue);
 			return result;
 		case SUB:
-			System.out.println(leftValue + " - " + rightValue);
+			//System.out.println(leftValue + " - " + rightValue);
 			result.setValue(leftValue - rightValue);
 			return result;
 		case MUL:
-			System.out.println(leftValue + " * " + rightValue);
+			//System.out.println(leftValue + " * " + rightValue);
 			result.setValue(leftValue * rightValue);
 			return result;
 		case DIV:
-			System.out.println(leftValue + " / " + rightValue);
+			//System.out.println(leftValue + " / " + rightValue);
 			result.setValue(leftValue / rightValue);
 			return result;
 		default:
@@ -243,14 +254,13 @@ public class StateMachineManipulation {
 	}
 
 	private BooleanData evaluateBooleanOperation(Operator op, Data leftData, Data rightData) {
-		System.out.println("evaluateBooleanOperation");
 		SimplStateMachineFactory factory = new SimplStateMachineFactoryImpl();
 		BooleanData result = factory.createBooleanData();
 
 		// TRAITEMENT DU CAS PARTICULIER DU NOT
 		if (op.equals(Operator.NOT)) {
 			result.setValue(!((BooleanData) leftData).isValue());
-			System.out.println("! " + result.isValue());
+			//System.out.println("! " + result.isValue());
 			return result;
 		}
 
@@ -258,11 +268,11 @@ public class StateMachineManipulation {
 		if (leftData instanceof BooleanData && rightData instanceof BooleanData) {
 			switch (op) {
 			case EQ:
-				System.out.println(((BooleanData) leftData).isValue() + "==" + ((BooleanData) rightData).isValue());
+				//System.out.println(((BooleanData) leftData).isValue() + "==" + ((BooleanData) rightData).isValue());
 				result.setValue(((BooleanData) leftData).isValue() == ((BooleanData) rightData).isValue());
 				return result;
 			case NEQ:
-				System.out.println(((BooleanData) leftData).isValue() + "!=" + ((BooleanData) rightData).isValue());
+				//System.out.println(((BooleanData) leftData).isValue() + "!=" + ((BooleanData) rightData).isValue());
 				result.setValue(!(((BooleanData) leftData).isValue() == ((BooleanData) rightData).isValue()));
 				return result;
 			default:
@@ -271,11 +281,11 @@ public class StateMachineManipulation {
 		} else if (leftData instanceof IntegerData && rightData instanceof IntegerData) {
 			switch (op) {
 			case EQ:
-				System.out.println(((IntegerData) leftData).getValue() + "==" + ((IntegerData) rightData).getValue());
+				//System.out.println(((IntegerData) leftData).getValue() + "==" + ((IntegerData) rightData).getValue());
 				result.setValue(((IntegerData) leftData).getValue() == ((IntegerData) rightData).getValue());
 				return result;
 			case NEQ:
-				System.out.println(((IntegerData) leftData).getValue() + "!=" + ((IntegerData) rightData).getValue());
+				//System.out.println(((IntegerData) leftData).getValue() + "!=" + ((IntegerData) rightData).getValue());
 				result.setValue(!(((IntegerData) leftData).getValue() == ((IntegerData) rightData).getValue()));
 				return result;
 			default:
@@ -286,27 +296,27 @@ public class StateMachineManipulation {
 		// TRAITEMENT GENERAL
 		switch (op) {
 		case GT:
-			System.out.println(((IntegerData) leftData).getValue() + " > " + ((IntegerData) rightData).getValue());
+			//System.out.println(((IntegerData) leftData).getValue() + " > " + ((IntegerData) rightData).getValue());
 			result.setValue(((IntegerData) leftData).getValue() > ((IntegerData) rightData).getValue());
 			return result;
 		case GTE:
-			System.out.println(((IntegerData) leftData).getValue() + " >= " + ((IntegerData) rightData).getValue());
+			//System.out.println(((IntegerData) leftData).getValue() + " >= " + ((IntegerData) rightData).getValue());
 			result.setValue(((IntegerData) leftData).getValue() >= ((IntegerData) rightData).getValue());
 			return result;
 		case LT:
-			System.out.println(((IntegerData) leftData).getValue() + " < " + ((IntegerData) rightData).getValue());
+			//System.out.println(((IntegerData) leftData).getValue() + " < " + ((IntegerData) rightData).getValue());
 			result.setValue(((IntegerData) leftData).getValue() < ((IntegerData) rightData).getValue());
 			return result;
 		case LTE:
-			System.out.println(((IntegerData) leftData).getValue() + " >= " + ((IntegerData) rightData).getValue());
+			//System.out.println(((IntegerData) leftData).getValue() + " >= " + ((IntegerData) rightData).getValue());
 			result.setValue(((IntegerData) leftData).getValue() <= ((IntegerData) rightData).getValue());
 			return result;
 		case AND:
-			System.out.println(((BooleanData) leftData).isValue() + " && " + ((BooleanData) rightData).isValue());
+			//System.out.println(((BooleanData) leftData).isValue() + " && " + ((BooleanData) rightData).isValue());
 			result.setValue(((BooleanData) leftData).isValue() && ((BooleanData) rightData).isValue());
 			return result;
 		case OR:
-			System.out.println(((BooleanData) leftData).isValue() + " || " + ((BooleanData) rightData).isValue());
+			//System.out.println(((BooleanData) leftData).isValue() + " || " + ((BooleanData) rightData).isValue());
 			result.setValue(((BooleanData) leftData).isValue() || ((BooleanData) rightData).isValue());
 			return result;
 		default:
@@ -317,13 +327,6 @@ public class StateMachineManipulation {
 	}
 
 	private Data evaluate(ExpressionElement ex) {
-		
-
-		System.out.println("evaluate");
-		
-		if (ex == null) {
-			System.out.println("EXPRESSION IS NULL!");
-		}
 
 		if (ex instanceof VariableReference) {
 			return ((VariableReference) ex).getVariable().getValue();
@@ -384,12 +387,12 @@ public class StateMachineManipulation {
 	}
 
 	private boolean isIntegerResult(Operator op) {
-		System.out.println("isIntegerResult?");
+		//System.out.println("isIntegerResult?");
 		return op.equals(Operator.ADD) || op.equals(Operator.SUB) || op.equals(Operator.MUL) || op.equals(Operator.DIV);
 	}
 
 	private boolean isBooleanResult(Operator op) {
-		System.out.println("isBooleanResult?");
+		//System.out.println("isBooleanResult?");
 		return op.equals(Operator.AND) || op.equals(Operator.OR) || op.equals(Operator.NOT) || op.equals(Operator.GT)
 				|| op.equals(Operator.GTE) || op.equals(Operator.LT) || op.equals(Operator.LTE)
 				|| op.equals(Operator.EQ) || op.equals(Operator.NEQ);
@@ -415,9 +418,9 @@ public class StateMachineManipulation {
 
 		StateMachineManipulation util = new StateMachineManipulation();
 
-		System.out.println(" Chargement du mod�le");
+		System.out.println(" Chargement du modele");
 		StateMachine sm = util.getModelBase("models/Voiture.xmi");
-		System.out.println(" Mod�le charg�");
+		System.out.println(" Modele charge");
 
 		util.executeStateMachine(sm);
 	}
