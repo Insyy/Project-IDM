@@ -406,22 +406,24 @@ public class StateMachineManipulation {
 		String event = "";
 
 		while (!event.equals("end")) {
-			System.out.print("Entrez le nom d'un �v�nement (\"end\" pour terminer) : ");
+			System.out.print("\nEntrez le nom d'un evenement (\"end\" pour terminer) : ");
 			event = scan.nextLine();
 			if (!event.equals("end"))
 				processEvent(event, sm);
 		}
-
 	}
 
 	public static void main(String argv[]) {
 
 		StateMachineManipulation util = new StateMachineManipulation();
+		String modelName = "Voiture.xmi";
 
 		System.out.println(" Chargement du modele");
-		StateMachine sm = util.getModelBase("models/Voiture.xmi");
+		StateMachine sm = util.getModelBase("models/" + modelName);
 		System.out.println(" Modele charge");
 
 		util.executeStateMachine(sm);
+		
+		util.sauverModele("transfosJava/" + modelName, sm);
 	}
 }
