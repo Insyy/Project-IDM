@@ -11,11 +11,7 @@ import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMLMapImpl;
 
 import SimplStateMachine.*;
-import SimplStateMachine.impl.BooleanDataImpl;
-import SimplStateMachine.impl.DataImpl;
-import SimplStateMachine.impl.IntegerDataImpl;
 import SimplStateMachine.impl.SimplStateMachineFactoryImpl;
-import SimplStateMachine.impl.VariableReferenceImpl;
 
 public class StateMachineManipulation {
 
@@ -411,6 +407,8 @@ public class StateMachineManipulation {
 			if (!event.equals("end"))
 				processEvent(event, sm);
 		}
+		
+		scan.close();
 	}
 
 	public static void main(String argv[]) {
