@@ -4,6 +4,150 @@ module StateMachineDuplication;
 create result : MM from model : MM;
 
 
+-------------HELPERS--------------
+
+
+helper context MM!Data def: toIntegerData(): MM!IntegerData =
+	let iData : MM!IntegerData = MM!IntegerData.newInstance()
+	in iData.refSetValue('value', self.value);
+
+helper context MM!Data def: toBooleanData(): MM!BooleanData =
+	let bData : MM!BooleanData = MM!BooleanData.newInstance()
+	in bData.refSetValue('value', self.value);
+
+
+helper def: isIntegerResult(exp : MM!Expression) : Boolean = 
+	exp.operator = #add or
+	exp.operator = #sub or
+	exp.operator = #mul or
+	exp.operator = #"div";
+
+helper def: isBooleanResult(exp : MM!Expression) : Boolean = 
+	exp.operator = #"and" or
+	exp.operator = #"or" or
+	exp.operator = #"not" or
+	exp.operator = #gt or
+	exp.operator = #gte or
+	exp.operator = #lt or
+	exp.operator = #lte or
+	exp.operator = #eq or
+	exp.operator = #neq;
+
+helper def: evaluateAsInteger(exp : MM!Expression)
+	: MM!IntegerData =
+		let iDataValue : Integer = 
+		if exp.operator = #add
+		then exp.left.value + exp.right.value
+		else
+			if exp.operator = #sub
+			then exp.leftData.value - exp.right.value
+			else 
+				if exp.operator = #mul
+				then exp.left.value * exp.right.value
+				else exp.left.value / exp.right.value
+				endif
+			endif
+		endif
+	in let iData : MM!IntegerData = MM!IntegerData.newInstance()
+	in iData.refSetValue('value', iDataValue);
+
+helper def: evaluateAsBoolean(exp : MM!Expression)
+	: MM!BooleanData =
+		let bDataValue : Boolean = 
+		if exp.operator = #"not"
+		then not exp.left.value
+		else
+			if exp.operator = #eq 
+			then exp.left.value = exp.right.value
+			else 
+			if exp.operator = #neq 
+			then not (exp.left.value = exp.right.value)
+				else
+			if exp.operator = #gt
+			then exp.left.value > exp.right.value
+					else
+			if exp.operator = #gte
+			then exp.left.value >= exp.right.value  
+						else
+			if exp.operator = #lt
+			then exp.left.value < exp.right.value
+							else
+			if exp.operator = #gte
+			then exp.left.value >= exp.right.value 
+								else
+			if exp.operator = #"and"
+			then exp.left.value = true and exp.right.value = true  
+			else exp.left.value = true or exp.right.value = true
+									endif
+								endif
+							endif
+						endif
+					endif
+				endif
+			endif
+		endif
+	in let bData : MM!BooleanData = MM!BooleanData.newInstance()
+	in bData.refSetValue('value', bDataValue);
+
+helper def : evaluate(expElem : MM!ExpressionElement) : MM!Data = 
+	if expElem.oclIsTypeOf(MM!VariableReference) 
+		then expElem.variable.value
+	else
+		if expElem.oclIsKindOf(MM!Data)
+		then expElem
+		else
+			--expElem is of type Expression
+			if thisModule.isIntegerResult(expElem)
+			then 
+				let leftData: MM!IntegerData =
+					if expElem.left.oclIsTypeOf(MM!VariableReference)
+					then expElem.left.variable.value
+					else
+						if expElem.left.oclIsTypeOf(MM!IntegerData)
+						then expElem.left
+						else thisModule.evaluate(expElem.left)
+						endif
+					endif
+				in let rigthData: MM!IntegerData = 
+					if expElem.right.oclIsTypeOf(MM!VariableReference)
+					then expElem.right.variable.value
+					else
+						if expElem.right.oclIsTypeOf(MM!IntegerData)
+						then expElem.right
+						else thisModule.evaluate(expElem.right)
+						endif
+					endif
+					in thisModule.evaluateAsInteger(expElem)
+			else
+				if thisModule.isBooleanResult(expElem)
+			then
+				let leftData: MM!Data =
+					if expElem.left.oclIsTypeOf(MM!VariableReference)
+					then expElem.left.variable.value
+					else
+						if expElem.left.oclIsTypeOf(MM!Data)
+						then expElem.left
+						else thisModule.evaluate(expElem.left)
+						endif
+					endif
+				in let rigthData: MM!Data = 
+					if expElem.right.oclIsTypeOf(MM!VariableReference)
+					then expElem.right.variable.value
+					else
+						if expElem.right.oclIsTypeOf(MM!Data)
+						then expElem.right
+						else thisModule.evaluate(expElem.right)
+						endif
+					endif
+					in thisModule.evaluateAsBoolean(expElem)
+			else OclUndefined
+			endif
+		endif
+	endif
+endif;
+	
+
+
 ---------- STATEMACHINE ----------
 
 rule duplicateStateMachine { 
@@ -21,12 +165,22 @@ to
 	 	 events <- sourceStateMachine.events,
 	 	 variables <- sourceStateMachine.variables
 	 )
-} 
-
+do {
+	sourceStateMachine.isActive <- true;
+	('Activated ' + sourceStateMachine.name).println();
+	sourceStateMachine.initialState.referencedState.isActive <- true;
+	('\tActivated initial state ' 
+				+ sourceStateMachine.initialState.referencedState.name
+				+ ' of state machine '
+				+ sourceStateMachine.name
+			).println();
+	
+	} 
+}
 
 ---------- STATE ----------
 
-rule duplicateState { 
+rule duplicateState {
 from
 	 sourceState : MM!State (sourceState.oclIsTypeOf(MM!State))
 to
@@ -36,8 +190,7 @@ to
 	 	 isActive <- sourceState.isActive,
 	 	 operation <- sourceState.operation
 	 )
-} 
-
+}
 
 ---------- COMPOSITESTATE ----------
 
@@ -53,8 +206,18 @@ to
 	 	 states <- sourceCompositeState.states,
 	 	 initialState <- sourceCompositeState.initialState
 	 )
-} 
-
+do {
+	if (sourceCompositeState.container.isActive and sourceCompositeState.initialState.referencedState = sourceCompositeState){
+		('Container of ' + sourceCompositeState.name + ' is active').println();
+		sourceCompositeState.initialState.referencedState.isActive <- true;
+		('\tActivated initial state ' 
+				+ sourceCompositeState.initialState.referencedState.name
+				+ ' of composite '
+				+ sourceCompositeState.name
+			).println();
+		}
+	}
+}
 
 ---------- INITIALSTATE ----------
 
@@ -144,12 +307,26 @@ to
 	 	 value <- sourceBooleanVariable.value,
 	 	 name <- sourceBooleanVariable.name
 	 )
+do {
+	for (s in MM!State.allInstances()) {
+		if (s.isActive and (not s.operation.oclIsUndefined())) {
+			for (ass in s.operation.contents){
+				if (ass.variable = sourceBooleanVariable) {
+					targetBooleanVariable.value 
+					<- thisModule.evaluate(ass.expression).toBooleanData();
+					('Value assigned to ' + targetBooleanVariable.name 
+							+ ' : ' + targetBooleanVariable.value.value).println();
+					}
+				}
+			}
+		}
+	}
 } 
 
 
 ---------- INTEGERVARIABLE ----------
 
-rule duplicateIntegerVariable { 
+rule duplicateIntegerVariable {
 from
 	 sourceIntegerVariable : MM!IntegerVariable
 to
@@ -157,6 +334,20 @@ to
 	 	 value <- sourceIntegerVariable.value,
 	 	 name <- sourceIntegerVariable.name
 	 )
+do {
+	for (s in MM!State.allInstances()) {
+		if (s.isActive and (not s.operation.oclIsUndefined())) {
+			for (ass in s.operation.contents){
+				if (ass.variable = sourceIntegerVariable) {
+					targetIntegerVariable.value
+					<- thisModule.evaluate(ass.expression).toIntegerData();
+					('Value assigned to ' + targetIntegerVariable.name 
+							+ ' : ' + targetIntegerVariable.value.value).println();
+					}
+				}
+			}
+		}
+	}	
 } 
 
 
@@ -184,7 +375,8 @@ to
 	 	 variable <- sourceAssignment.variable,
 	 	 _name <- sourceAssignment._name
 	 )
-} 
+}
+
 
 
 ---------- VARIABLEREFERENCE ----------

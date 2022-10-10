@@ -1,13 +1,13 @@
-<?xml version="1.0" encoding="ASCII"?>
+<?xml version="1.0" encoding="ISO-8859-1"?>
 <SimplStateMachine:StateMachine xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:SimplStateMachine="platform:/resource/StateMachine/metaModels/StateMachine.ecore" name="Voiture" isActive="true">
-  <states name="Arret">
+  <states name="Arret" isActive="true">
     <operation name="arret">
       <contents variable="//@variables.0" _name="vitesse := 0">
         <expression xsi:type="SimplStateMachine:IntegerData"/>
       </contents>
     </operation>
   </states>
-  <states xsi:type="SimplStateMachine:CompositeState" name="Marche" isActive="true">
+  <states xsi:type="SimplStateMachine:CompositeState" name="Marche">
     <states name="MoinsVite">
       <operation>
         <contents variable="//@variables.0" _name="vitesse -=10">
@@ -18,7 +18,7 @@
         </contents>
       </operation>
     </states>
-    <states name="PlusVite" isActive="true">
+    <states name="PlusVite">
       <operation>
         <contents variable="//@variables.0" _name="vitesse += 10">
           <expression xsi:type="SimplStateMachine:Expression" _name="+">
@@ -40,8 +40,8 @@
     </states>
     <initialState referencedState="//@states.1/@states.1"/>
   </states>
-  <states xsi:type="SimplStateMachine:StateMachine" name="Voiture">
-    <states name="Arret">
+  <states xsi:type="SimplStateMachine:StateMachine" name="Voiture" isActive="true">
+    <states name="Arret" isActive="true">
       <operation>
         <contents variable="//@states.2/@variables.0" _name="vitesse := 0">
           <expression xsi:type="SimplStateMachine:IntegerData"/>
@@ -115,7 +115,9 @@
     </transitions>
     <events name="ralentir"/>
     <events name="accelerer"/>
-    <variables xsi:type="SimplStateMachine:IntegerVariable" name="vitesse"/>
+    <variables xsi:type="SimplStateMachine:IntegerVariable" name="vitesse">
+      <value xsi:type="SimplStateMachine:IntegerData"/>
+    </variables>
     <variables xsi:type="SimplStateMachine:BooleanVariable" name="maxAtteint">
       <value xsi:type="SimplStateMachine:BooleanData"/>
     </variables>
@@ -155,7 +157,7 @@
   <events name="ralentir"/>
   <events name="accelerer"/>
   <variables xsi:type="SimplStateMachine:IntegerVariable" name="vitesse">
-    <value xsi:type="SimplStateMachine:IntegerData" value="10"/>
+    <value xsi:type="SimplStateMachine:IntegerData"/>
   </variables>
   <variables xsi:type="SimplStateMachine:BooleanVariable" name="maxAtteint">
     <value xsi:type="SimplStateMachine:BooleanData"/>
