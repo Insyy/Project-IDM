@@ -1,8 +1,8 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
-<SimplStateMachine:StateMachine xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:SimplStateMachine="platform:/resource/StateMachine/metaModels/StateMachine.ecore" name="Feu Tricolore">
+<?xml version="1.0" encoding="ASCII"?>
+<SimplStateMachine:StateMachine xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:SimplStateMachine="platform:/resource/StateMachine/metaModels/StateMachine.ecore" name="Feu Tricolore" isActive="true">
   <states name="Rouge"/>
   <states name="Vert"/>
-  <states name="Jaune"/>
+  <states name="Jaune" isActive="true"/>
   <initialState referencedState="//@states.0"/>
   <transitions source="//@states.2" target="//@states.0" event="//@events.0"/>
   <transitions source="//@states.0" target="//@states.1" event="//@events.1"/>

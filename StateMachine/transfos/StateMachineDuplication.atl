@@ -167,14 +167,7 @@ to
 	 )
 do {
 	sourceStateMachine.isActive <- true;
-	('Activated ' + sourceStateMachine.name).println();
-	sourceStateMachine.initialState.referencedState.isActive <- true;
-	('\tActivated initial state ' 
-				+ sourceStateMachine.initialState.referencedState.name
-				+ ' of state machine '
-				+ sourceStateMachine.name
-			).println();
-	
+	(sourceStateMachine.name + ' is now active').println();
 	} 
 }
 
@@ -190,6 +183,21 @@ to
 	 	 isActive <- sourceState.isActive,
 	 	 operation <- sourceState.operation
 	 )
+	 
+do {
+	if (sourceState.container.isActive 
+			and sourceState.container.initialState.referencedState = sourceState){
+		
+		('Composite state ' 
+				+ sourceState.container.name 
+				+ ' is active and its initial state is ' 
+				+ sourceState.name ).println();
+		
+		sourceState.isActive <- true;
+		('\t' + targetState.name + ' is now active').println();
+	
+		}
+	}
 }
 
 ---------- COMPOSITESTATE ----------
@@ -207,14 +215,17 @@ to
 	 	 initialState <- sourceCompositeState.initialState
 	 )
 do {
-	if (sourceCompositeState.container.isActive and sourceCompositeState.initialState.referencedState = sourceCompositeState){
-		('Container of ' + sourceCompositeState.name + ' is active').println();
-		sourceCompositeState.initialState.referencedState.isActive <- true;
-		('\tActivated initial state ' 
-				+ sourceCompositeState.initialState.referencedState.name
-				+ ' of composite '
-				+ sourceCompositeState.name
-			).println();
+	if (sourceCompositeState.container.isActive 
+			and sourceCompositeState.container.initialState.referencedState = sourceCompositeState){
+		
+		('Composite state ' 
+				+ sourceCompositeState.container.name 
+				+ ' is active and its initial state is ' 
+				+ sourceCompositeState.name ).println();
+		
+		sourceCompositeState.isActive <- true;
+		('\t' + targetCompositeState.name + ' is now active').println();
+		
 		}
 	}
 }
@@ -312,10 +323,22 @@ do {
 		if (s.isActive and (not s.operation.oclIsUndefined())) {
 			for (ass in s.operation.contents){
 				if (ass.variable = sourceBooleanVariable) {
+					(
+							'State ' 
+							+ s.name 
+							+ ' is associated to assignment ' 
+							+ ass._name
+							).println();
+					
 					targetBooleanVariable.value 
 					<- thisModule.evaluate(ass.expression).toBooleanData();
-					('Value assigned to ' + targetBooleanVariable.name 
-							+ ' : ' + targetBooleanVariable.value.value).println();
+					
+					(
+							'\tValue ' 
+							+ targetBooleanVariable.value.value 
+							+ ' assigned to ' 
+							+ targetBooleanVariable.name
+							).println();
 					}
 				}
 			}
@@ -339,10 +362,22 @@ do {
 		if (s.isActive and (not s.operation.oclIsUndefined())) {
 			for (ass in s.operation.contents){
 				if (ass.variable = sourceIntegerVariable) {
-					targetIntegerVariable.value
+					(
+							'State ' 
+							+ s.name 
+							+ ' is associated to assignment ' 
+							+ ass._name
+							).println();
+					
+					targetIntegerVariable.value 
 					<- thisModule.evaluate(ass.expression).toIntegerData();
-					('Value assigned to ' + targetIntegerVariable.name 
-							+ ' : ' + targetIntegerVariable.value.value).println();
+					
+					(
+							'\tValue ' 
+							+ targetIntegerVariable.value.value 
+							+ ' assigned to ' 
+							+ targetIntegerVariable.name
+							).println();
 					}
 				}
 			}

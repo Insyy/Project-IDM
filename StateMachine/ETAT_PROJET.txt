@@ -1,0 +1,22 @@
+Etat du projet Ingénierie des Modèles de DUDES Arnaud et ALONSO Ivan M2 TI
+
+Travail attendu:
+
+1. Un moteur d'exécution des machines à états en Java/EMF qui à la fin de l'exécution (après avoir traité plusieurs événements), enregistre le modèle dans son état courant avec les valeurs calculées pour les variables.
+2. Une transformation ATL réalisant pour un modèle donné un premier pas d'exécution au niveau du positionnement des différents états actifs (sans se préoccuper de l'exécution des opérations associées à ces états).
+3. Une extension de la transformation ATL précédente qui réalise les affectations et les calculs des variables si des opérations sont associées aux états qui sont activés lors du premier pas d'exécution.
+
+	Réalisation 1.: Le moteur est correctement implémenté tel que demandé; le traitement des transitions et gardes
+		associées à ces dernières et l'affectation des variables sont correctement gérées grâce à l'implémentation de
+		méthodes d'évaluation des éléments d'expression (données, variables et expressions).
+		Le modèle est éxécuté puis sauvegardé dans le dossier /transfosJava/ et présente le comportement 
+		attendu pour les modèles fournis.
+	
+	Réalisation 2.: La transformation est implémentée tel que demandé; la machine à états est activée puis les états
+		composites (s'il y en a) et simples s'activent automatiquement à la chaîne.
+		Le modèle résultant est enregistré dans le dossier /transfosAtl/.
+	
+	Réalisation 3.: L'extension de la transformation précédente est implémentée tel que demandé; les affectations
+		associées aux états actifs sont éxécutées grâce à l'implémentation de méthodes d'évaluation des éléments 
+		d'expression (données, variables et expressions).
+		Le modèle résultant est enregistré dans le dossier /transfosAtl/.
